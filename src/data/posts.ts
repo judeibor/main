@@ -1,53 +1,90 @@
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+
+const postsDirectory = path.join(process.cwd(), "content/blog");
+
 export type Post = {
-  title: string;
   slug: string;
+  title: string;
   excerpt: string;
   publishedAt: string;
+  updatedAt?: string;
   category: string;
   tags: string[];
+  content: string;
   readingTime: string;
-  content: string[];
+  coverImage?: string;
+  coverImageAlt?: string;
+  images?: string[];
 };
 
-export const posts: Post[] = [
-  {
-    title: "Why I’m Building Vector Network",
-    slug: "why-im-building-vector-network",
-    excerpt:
-      "The thinking behind a decentralized vector-based economic system and the problem it aims to solve.",
-    publishedAt: "2026-05-08",
-    category: "Founding",
-    tags: ["Web3", "DeFi", "Systems"],
-    readingTime: "4 min read",
-    content: [
-      "Vector Network is my long-term vision for a decentralized economic system where value can move, evolve, and interact intelligently.",
-      "I am building it because I believe traditional financial structures are too static for the way digital economies should operate.",
-      "The goal is not only to create another blockchain product, but to design a new framework for trust, lending, staking, and programmable value.",
-    ],
-  },
-  {
-    title: "How I Think About Systems as a Developer",
-    slug: "how-i-think-about-systems",
-    excerpt:
-      "A practical view of product engineering, infrastructure thinking, and building software that scales.",
-    publishedAt: "2026-05-08",
-    category: "Engineering",
-    tags: ["Architecture", "Product", "Backend"],
-    readingTime: "3 min read",
-    content: [
-      "I do not just think about features. I think about the structure behind the features.",
-      "Good software should be usable, scalable, and maintainable under real-world conditions.",
-      "That mindset shapes how I approach frontend, backend, APIs, blockchain tools, and product design.",
-    ],
-  },
-];
+function estimateReadingTime(content: string) {
+  const words = content
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/[#>*`_\-\[\]()!]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
 
-export function getAllPosts() {
-  return [...posts].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  return `${minutes} min read`;
 }
 
-export function getPostBySlug(slug: string) {
-  return posts.find((post) => post.slug === slug);
+function parseStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  const items = value.map(String).map((item) => item.trim()).filter(Boolean);
+  return items.length > 0 ? items : undefined;
+}
+
+function readPostFile(slug: string): Post | null {
+  const filePath = path.join(postsDirectory, `${slug}.mdx`);
+
+  if (!fs.existsSync(filePath)) return null;
+
+  const source = fs.readFileSync(filePath, "utf8");
+  const { data, content } = matter(source);
+
+  const images = parseStringArray(data.images);
+  const coverImage = data.coverImage ? String(data.coverImage) : images?.[0];
+
+  return {
+    slug,
+    title: String(data.title ?? slug),
+    excerpt: String(data.excerpt ?? ""),
+    publishedAt: String(data.publishedAt ?? new Date().toISOString()),
+    updatedAt: data.updatedAt ? String(data.updatedAt) : undefined,
+    category: String(data.category ?? "General"),
+    tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+    coverImage,
+    coverImageAlt: data.coverImageAlt ? String(data.coverImageAlt) : undefined,
+    images,
+    content: content.trim(),
+    readingTime: estimateReadingTime(content),
+  };
+}
+
+function getPostSlugs() {
+  if (!fs.existsSync(postsDirectory)) return [];
+
+  return fs
+    .readdirSync(postsDirectory)
+    .filter((file) => file.endsWith(".mdx"))
+    .map((file) => file.replace(/\.mdx$/, ""));
+}
+
+export function getAllPosts(): Post[] {
+  return getPostSlugs()
+    .map((slug) => readPostFile(slug))
+    .filter((post): post is Post => Boolean(post))
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
+}
+
+export function getPostBySlug(slug: string): Post | null {
+  return readPostFile(slug);
 }

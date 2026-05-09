@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { Analytics } from "@vercel/analytics/next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://judeibor.vercel.app";
 
@@ -16,22 +17,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Jude Ibor" }],
   creator: "Jude Ibor",
   publisher: "Jude Ibor",
-  alternates: {
-    canonical: "/",
-  },
-  keywords: [
-    "Jude Ibor",
-    "developer",
-    "founder",
-    "Web3 builder",
-    "blockchain researcher",
-    "software developer Nigeria",
-    "Node.js developer Nigeria",
-    "React developer",
-    "Next.js developer",
-    "decentralized systems",
-    "Vector Network",
-  ],
   robots: {
     index: true,
     follow: true,
@@ -77,6 +62,7 @@ export default function RootLayout({
               <p>Founder & CEO of Vector Network (vNetwork)</p>
             </div>
           </footer>
+          <Analytics mode="production" />
         </div>
       </body>
     </html>
