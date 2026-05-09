@@ -1,65 +1,154 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getAllPosts } from "@/data/posts";
+import { projects } from "@/data/projects";
 
-export default function Home() {
+export default function HomePage() {
+  const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
+  const latestPost = getAllPosts()[0];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="mx-auto max-w-6xl px-6 py-16 sm:px-8 lg:px-12">
+      <section className="max-w-4xl py-8 sm:py-16">
+        <p className="text-sm font-medium uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
+          Nigerian Software Developer • Web3 Innovator • Founder
+        </p>
+
+        <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">
+          Jude Ibor builds decentralized systems, product experiences, and long-term digital infrastructure.
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
+          Founder & CEO of Vector Network (vNetwork), Computer Science student at UNICROSS,
+          and a full-stack builder focused on scalable software, blockchain, and the future of
+          digital economies.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-4">
+          <Link
+            href="/projects"
+            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
+          >
+            View Projects
+          </Link>
+          <Link
+            href="/blog"
+            className="rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
+          >
+            Read Blog
+          </Link>
+          <Link
+            href="/contact"
+            className="rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
+          >
+            Contact Me
+          </Link>
+        </div>
+      </section>
+
+      <section className="grid gap-6 border-t border-zinc-200 py-12 dark:border-zinc-800 md:grid-cols-3">
+        <div>
+          <h2 className="text-lg font-semibold">Founder mindset</h2>
+          <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+            I build with long-term vision, originality, and execution. My work is centered on
+            useful systems that solve real problems.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div>
+          <h2 className="text-lg font-semibold">Technical focus</h2>
+          <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+            Frontend, backend, blockchain, APIs, databases, AI tools, and product architecture.
+          </p>
         </div>
-      </main>
-    </div>
+        <div>
+          <h2 className="text-lg font-semibold">Current mission</h2>
+          <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+            Expanding Vector Network and building a public developer brand around serious systems work.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-t border-zinc-200 py-12 dark:border-zinc-800">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+              Featured Projects
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Selected work</h2>
+          </div>
+          <Link
+            href="/projects"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100"
+          >
+            See all
+          </Link>
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {featuredProjects.map((project) => (
+            <article
+              key={project.slug}
+              className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800 dark:bg-zinc-900/40"
+            >
+              <h3 className="text-lg font-semibold">{project.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+                {project.description}
+              </p>
+              <p className="mt-4 text-sm font-medium text-zinc-950 dark:text-zinc-100">
+                {project.impact}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {project.stack.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-8 border-t border-zinc-200 py-12 dark:border-zinc-800 lg:grid-cols-2">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+            Latest Writing
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">Recent post</h2>
+
+          <article className="mt-6 rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800 dark:bg-zinc-900/40">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {latestPost.category} · {latestPost.readingTime}
+            </p>
+            <h3 className="mt-2 text-xl font-semibold">{latestPost.title}</h3>
+            <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
+              {latestPost.excerpt}
+            </p>
+            <Link
+              href={`/blog/${latestPost.slug}`}
+              className="mt-5 inline-flex text-sm font-medium text-zinc-950 hover:text-zinc-700 dark:text-zinc-100 dark:hover:text-zinc-300"
+            >
+              Read post →
+            </Link>
+          </article>
+        </div>
+
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+            About this site
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">Built for discovery</h2>
+          <p className="mt-6 text-base leading-8 text-zinc-600 dark:text-zinc-300">
+            This site is designed to present a clear professional identity, publish articles,
+            showcase projects, and make it easy for people to contact you.
+          </p>
+          <p className="mt-4 text-base leading-8 text-zinc-600 dark:text-zinc-300">
+            It is the base for your full personal brand platform.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
