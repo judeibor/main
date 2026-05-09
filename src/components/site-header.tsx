@@ -12,6 +12,32 @@ const navItems = [
   { href: "/contact", label: "Contact" },
 ];
 
+function ArrowUpRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        d="M7 17L17 7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 7H17V15"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
 
@@ -219,16 +245,14 @@ export function SiteHeader() {
                     }}
                   >
                     <span>{item.label}</span>
-                    <span
+                    <ArrowUpRightIcon
                       className={[
-                        "text-xs transition-all duration-200",
+                        "h-4 w-4 transition-all duration-200",
                         active
                           ? "text-zinc-950 dark:text-white"
-                          : "text-zinc-400 group-hover:translate-x-0.5 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-300",
+                          : "text-zinc-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-300",
                       ].join(" ")}
-                    >
-                      ↗
-                    </span>
+                    />
                   </Link>
                 );
               })}

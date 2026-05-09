@@ -1,1 +1,28 @@
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="strokeGrad" x1="128" y1="96" x2="384" y2="416" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#A1A1AA"/>
+    </linearGradient>
+
+    <linearGradient id="softGlow" x1="176" y1="128" x2="336" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="56" y="56" width="400" height="400" rx="96" fill="#0A0A0A"/>
+  <rect x="56" y="56" width="400" height="400" rx="96" fill="url(#softGlow)"/>
+
+  <path
+    d="M184 156H238V316C238 354 218 380 176 380C154 380 137 374 122 362L144 328C153 336 163 340 174 340C188 340 192 331 192 315V156Z"
+    fill="url(#strokeGrad)"
+  />
+
+  <path
+    d="M274 156H330V380H274V156Z"
+    fill="url(#strokeGrad)"
+  />
+
+  <rect x="118" y="118" width="276" height="276" rx="72" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+</svg>

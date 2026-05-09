@@ -42,17 +42,8 @@ export default function ContactPage() {
               </a>
             </p>
 
-            <p>
-              <span className="font-medium text-zinc-950 dark:text-zinc-100">
-                Personal Email:
-              </span>{" "}
-              <a
-                href="mailto:Judeibor234@gmail.com"
-                className="transition hover:text-zinc-950 hover:underline dark:hover:text-white"
-              >
-                Judeibor234@gmail.com
-              </a>
-            </p>
+           
+             
 
             <p>
               <span className="font-medium text-zinc-950 dark:text-zinc-100">
