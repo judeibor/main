@@ -1,6 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { estimateReadingTime } from "@/lib/blog-utils";
-import type { Prisma } from "@prisma/client";
+
+type PostWithImages = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: Date;
+  updatedAt: Date | null;
+  category: string;
+  tags: string[] | null;
+  content: string;
+  coverImage: string | null;
+  coverImageAlt: string | null;
+  published: boolean;
+  featured: boolean;
+  wordCount: number | null;
+  images: { url: string }[];
+};
 
 export type Post = {
   slug: string;
@@ -20,10 +36,6 @@ export type Post = {
   wordCount?: number;
 };
 
-type PostWithImages = Prisma.PostGetPayload<{
-  include: { images: true };
-}>;
-
 function serializePost(post: PostWithImages): Post {
   return {
     slug: post.slug,
@@ -40,7 +52,7 @@ function serializePost(post: PostWithImages): Post {
     images: post.images.map((image) => image.url),
     published: post.published,
     featured: post.featured,
-    wordCount: post.wordCount,
+    wordCount: post.wordCount ?? undefined,
   };
 }
 
@@ -71,5 +83,5 @@ export async function getPostBySlug(
     },
   });
 
-  return post ? serializePost(post) : null;
+  return post ? serializePost(post as PostWithImages) : null;
 }
