@@ -1,7 +1,7 @@
-//src\app\blog\admin\blog-admin-form.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useFormStatus } from "react-dom";
 
 type BlogAdminFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -40,6 +40,9 @@ export function BlogAdminForm({
   const [featured, setFeatured] = useState(initialPost?.featured ?? false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+
+  const [isGeneratingSlug, startGeneratingSlug] = useTransition();
+  const [isClearingImages, startClearingImages] = useTransition();
 
   useEffect(() => {
     if (imageFiles.length === 0) {
@@ -95,7 +98,11 @@ export function BlogAdminForm({
         className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40"
       >
         {mode === "edit" ? (
-          <input type="hidden" name="originalSlug" value={initialPost?.slug ?? ""} />
+          <input
+            type="hidden"
+            name="originalSlug"
+            value={initialPost?.slug ?? ""}
+          />
         ) : null}
 
         <div className="flex flex-col gap-3 border-b border-zinc-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
@@ -112,10 +119,12 @@ export function BlogAdminForm({
 
           <button
             type="button"
-            onClick={generateSlugFromTitle}
-            className="inline-flex items-center justify-center rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            onClick={() => startGeneratingSlug(generateSlugFromTitle)}
+            disabled={isGeneratingSlug}
+            aria-busy={isGeneratingSlug}
+            className="inline-flex items-center justify-center rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
-            Generate slug
+            {isGeneratingSlug ? "Generating..." : "Generate slug"}
           </button>
         </div>
 
@@ -240,7 +249,7 @@ export function BlogAdminForm({
               placeholder={`Write your content here.
 
 Use image paths like:
-![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)`} 
+![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)`}
             />
           </div>
 
@@ -252,18 +261,15 @@ Use image paths like:
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={clearImages}
-                className="inline-flex items-center justify-center rounded-full border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                onClick={() => startClearingImages(clearImages)}
+                disabled={isClearingImages}
+                aria-busy={isClearingImages}
+                className="inline-flex items-center justify-center rounded-full border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
               >
-                Clear images
+                {isClearingImages ? "Clearing..." : "Clear images"}
               </button>
 
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
-              >
-                {mode === "edit" ? "Update post" : "Save post"}
-              </button>
+              <SubmitButton mode={mode} />
             </div>
           </div>
         </div>
@@ -351,6 +357,21 @@ Use image paths like:
         </div>
       </aside>
     </div>
+  );
+}
+
+function SubmitButton({ mode }: { mode: "create" | "edit" }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending}
+      className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
+    >
+      {pending ? (mode === "edit" ? "Updating..." : "Saving...") : mode === "edit" ? "Update post" : "Save post"}
+    </button>
   );
 }
 

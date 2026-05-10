@@ -10,35 +10,40 @@ type Props = {
   }>;
 };
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const visitorId = cookieStore.get("blog_visitor_id")?.value ?? null;
+ const cookieStore = await cookies();
+const visitorId = cookieStore.get("blog_visitor_id")?.value ?? null;
 
-  const post = await prisma.post.findFirst({
-    where: {
-      slug,
-      published: true,
-    },
-    include: {
-      images: {
-        orderBy: { createdAt: "asc" },
+  let post;
+  try {
+    post = await prisma.post.findFirst({
+      where: {
+        slug,
+        published: true,
       },
-      stats: {
-        include: {
-          comments: {
-            orderBy: { createdAt: "asc" },
+      include: {
+        images: {
+          orderBy: { createdAt: "asc" },
+        },
+        stats: {
+          include: {
+            comments: {
+              orderBy: { createdAt: "asc" },
+            },
           },
         },
       },
-    },
-  });
-
-  if (!post) {
-    notFound();
+    });
+  } catch (err) {
+    console.error("Prisma query failed:", err);
+    throw err;
   }
+
+  if (!post) notFound();
 
   const coverImage = post.coverImage ?? post.images[0]?.url;
   const galleryImages = coverImage ? post.images.slice(1) : post.images;
@@ -133,8 +138,6 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
           </div>
         </article>
-
-        
       </section>
 
       <BlogEngagement
