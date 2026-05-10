@@ -1,3 +1,4 @@
+//src\app\api\blog\[slug]\stats\route.ts
 import { NextResponse } from "next/server";
 import { ensurePostStatsFile, getPostStats } from "@/lib/blog-metrics";
 
@@ -8,16 +9,30 @@ type Context = {
 };
 
 export async function GET(_req: Request, context: Context) {
-  const { slug } = await context.params;
+  try {
+    const { slug } = await context.params;
 
-  await ensurePostStatsFile(slug);
-  const stats = await getPostStats(slug);
+    await ensurePostStatsFile(slug);
+    const stats = await getPostStats(slug);
 
-  return NextResponse.json(stats, {
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
+    return NextResponse.json(stats, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Post not found" },
+      {
+        status: 404,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
+  }
 }

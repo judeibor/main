@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getAllPosts } from "@/data/posts";
 import { getPostStats } from "@/lib/blog-metrics";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://judeibor.vercel.app";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://judeibor.vercel.app";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -54,8 +55,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const params = (await searchParams) ?? {};
   const showAll = params.show === "all";
 
-  const posts = getAllPosts();
-  const visiblePosts = showAll ? posts : posts.slice(0, 3);
+  const allPosts = await getAllPosts();
+  const visiblePosts = showAll ? allPosts : allPosts.slice(0, 3);
 
   const postsWithStats = await Promise.all(
     visiblePosts.map(async (post) => {
@@ -129,7 +130,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           )}
         </section>
 
-        {posts.length > 3 && !showAll ? (
+        {allPosts.length > 3 && !showAll ? (
           <div className="mt-10 flex justify-center">
             <Link
               href="/blog?show=all"

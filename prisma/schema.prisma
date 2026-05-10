@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id            String            @id @default(cuid())
+  slug          String            @unique
+  title         String
+  excerpt       String            @db.Text
+  content       String            @db.Text
+  category      String
+  tags          String[]
+  coverImage    String?
+  coverImageAlt String?
+  wordCount     Int               @default(0)
+  published     Boolean           @default(false)
+  featured      Boolean           @default(false)
+  publishedAt   DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  images        PostImage[]
+  stats         BlogPostStats?
+  likes BlogPostLike[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([publishedAt])
+  @@index([createdAt])
+}
+
+model PostImage {
+  id        String   @id @default(cuid())
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  url       String
+  alt       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}
+
+model BlogPostStats {
+  id        String            @id @default(cuid())
+
+  postId    String            @unique
+  post      Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  views     Int               @default(0)
+  likes     Int               @default(0)
+  comments  BlogPostComment[]
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([postId])
+}
+
+model BlogPostComment {
+  id        String         @id @default(cuid())
+
+  statsId   String
+  stats     BlogPostStats  @relation(fields: [statsId], references: [id], onDelete: Cascade)
+
+  name      String
+  message   String         @db.Text
+  createdAt DateTime       @default(now())
+
+  @@index([statsId])
+}
+
+model BlogPostLike {
+  id        String   @id @default(cuid())
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@unique([postId, visitorId])
+  @@index([postId])
+  @@index([visitorId])
+}

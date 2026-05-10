@@ -1,7 +1,4 @@
-import fs from "fs/promises";
-import path from "path";
-
-const statsDir = path.join(process.cwd(), "content", "blog-stats");
+import { prisma } from "@/lib/prisma";
 
 export type BlogComment = {
   id: string;
@@ -16,10 +13,6 @@ export type BlogStats = {
   comments: BlogComment[];
 };
 
-function statsPath(slug: string) {
-  return path.join(statsDir, `${slug}.json`);
-}
-
 function defaultStats(): BlogStats {
   return {
     views: 0,
@@ -28,52 +21,125 @@ function defaultStats(): BlogStats {
   };
 }
 
-export async function ensurePostStatsFile(slug: string) {
-  await fs.mkdir(statsDir, { recursive: true });
+async function getPostIdOrThrow(slug: string) {
+  const post = await prisma.post.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
 
-  const file = statsPath(slug);
-
-  try {
-    await fs.access(file);
-  } catch {
-    await fs.writeFile(file, JSON.stringify(defaultStats(), null, 2), "utf8");
+  if (!post) {
+    throw new Error(`Post not found: ${slug}`);
   }
+
+  return post.id;
+}
+
+function toBlogStats(record: {
+  views: number;
+  likes: number;
+  comments: {
+    id: string;
+    name: string;
+    message: string;
+    createdAt: Date;
+  }[];
+}): BlogStats {
+  return {
+    views: Number(record.views ?? 0),
+    likes: Number(record.likes ?? 0),
+    comments: record.comments.map((comment) => ({
+      id: comment.id,
+      name: comment.name,
+      message: comment.message,
+      createdAt: comment.createdAt.toISOString(),
+    })),
+  };
+}
+
+async function ensureStatsRecord(slug: string) {
+  const postId = await getPostIdOrThrow(slug);
+
+  return prisma.blogPostStats.upsert({
+    where: { postId },
+    create: { postId },
+    update: {},
+    include: {
+      comments: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+}
+
+export async function ensurePostStatsFile(slug: string) {
+  await ensureStatsRecord(slug);
 }
 
 export async function getPostStats(slug: string): Promise<BlogStats> {
-  await ensurePostStatsFile(slug);
+  const postId = await getPostIdOrThrow(slug);
 
-  try {
-    const raw = await fs.readFile(statsPath(slug), "utf8");
-    const parsed = JSON.parse(raw) as Partial<BlogStats>;
+  const stats = await prisma.blogPostStats.findUnique({
+    where: { postId },
+    include: {
+      comments: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
 
-    return {
-      views: Number(parsed.views ?? 0),
-      likes: Number(parsed.likes ?? 0),
-      comments: Array.isArray(parsed.comments) ? parsed.comments : [],
-    };
-  } catch {
+  if (!stats) {
     return defaultStats();
   }
-}
 
-async function writeStats(slug: string, stats: BlogStats) {
-  await fs.mkdir(statsDir, { recursive: true });
-  await fs.writeFile(statsPath(slug), JSON.stringify(stats, null, 2), "utf8");
+  return toBlogStats(stats);
 }
 
 export async function incrementView(slug: string) {
-  const stats = await getPostStats(slug);
-  stats.views += 1;
-  await writeStats(slug, stats);
-  return stats;
+  const postId = await getPostIdOrThrow(slug);
+
+  const stats = await prisma.blogPostStats.upsert({
+    where: { postId },
+    create: {
+      postId,
+      views: 1,
+    },
+    update: {
+      views: {
+        increment: 1,
+      },
+    },
+    include: {
+      comments: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  return toBlogStats(stats);
 }
 
 export async function incrementLike(slug: string) {
-  const stats = await getPostStats(slug);
-  stats.likes += 1;
-  await writeStats(slug, stats);
-  return stats;
+  const postId = await getPostIdOrThrow(slug);
+
+  const stats = await prisma.blogPostStats.upsert({
+    where: { postId },
+    create: {
+      postId,
+      likes: 1,
+    },
+    update: {
+      likes: {
+        increment: 1,
+      },
+    },
+    include: {
+      comments: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  return toBlogStats(stats);
 }
 
 export async function addComment(
@@ -87,15 +153,24 @@ export async function addComment(
     throw new Error("Name and message are required.");
   }
 
-  const stats = await getPostStats(slug);
+  const postId = await getPostIdOrThrow(slug);
 
-  stats.comments.unshift({
-    id: crypto.randomUUID(),
-    name,
-    message,
-    createdAt: new Date().toISOString(),
+  const stats = await prisma.blogPostStats.upsert({
+    where: { postId },
+    create: { postId },
+    update: {},
+    select: {
+      id: true,
+    },
   });
 
-  await writeStats(slug, stats);
-  return stats;
+  await prisma.blogPostComment.create({
+    data: {
+      statsId: stats.id,
+      name,
+      message,
+    },
+  });
+
+  return getPostStats(slug);
 }

@@ -1,19 +1,43 @@
+//src\app\blog\admin\blog-admin-form.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 
 type BlogAdminFormProps = {
   action: (formData: FormData) => void | Promise<void>;
+  mode: "create" | "edit";
+  initialPost?: {
+    slug: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    tags: string[];
+    content: string;
+    coverImageAlt?: string | null;
+    published?: boolean;
+    featured?: boolean;
+    images?: string[];
+  };
 };
 
-export function BlogAdminForm({ action }: BlogAdminFormProps) {
-  const [slug, setSlug] = useState("");
-  const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [category, setCategory] = useState("Web3");
-  const [tags, setTags] = useState("Vector Network, vNetwork, DeFi, Blockchain");
-  const [coverImageAlt, setCoverImageAlt] = useState("");
-  const [content, setContent] = useState("");
+export function BlogAdminForm({
+  action,
+  mode,
+  initialPost,
+}: BlogAdminFormProps) {
+  const [slug, setSlug] = useState(initialPost?.slug ?? "");
+  const [title, setTitle] = useState(initialPost?.title ?? "");
+  const [excerpt, setExcerpt] = useState(initialPost?.excerpt ?? "");
+  const [category, setCategory] = useState(initialPost?.category ?? "Web3");
+  const [tags, setTags] = useState(
+    initialPost?.tags?.join(", ") ?? "Vector Network, vNetwork, DeFi, Blockchain"
+  );
+  const [coverImageAlt, setCoverImageAlt] = useState(
+    initialPost?.coverImageAlt ?? ""
+  );
+  const [content, setContent] = useState(initialPost?.content ?? "");
+  const [published, setPublished] = useState(initialPost?.published ?? true);
+  const [featured, setFeatured] = useState(initialPost?.featured ?? false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 
@@ -44,7 +68,10 @@ export function BlogAdminForm({ action }: BlogAdminFormProps) {
     return text.split(/\s+/).filter(Boolean).length;
   }, [title, excerpt, content]);
 
-  const coverPreviewUrl = imagePreviewUrls[0] || "";
+  const existingImages = initialPost?.images ?? [];
+  const displayImageUrls =
+    imagePreviewUrls.length > 0 ? imagePreviewUrls : existingImages;
+  const coverPreviewUrl = displayImageUrls[0] || "";
 
   function generateSlugFromTitle() {
     const generated = title
@@ -67,13 +94,19 @@ export function BlogAdminForm({ action }: BlogAdminFormProps) {
         action={action}
         className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40"
       >
+        {mode === "edit" ? (
+          <input type="hidden" name="originalSlug" value={initialPost?.slug ?? ""} />
+        ) : null}
+
         <div className="flex flex-col gap-3 border-b border-zinc-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
           <div>
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              Post editor
+              {mode === "edit" ? "Edit post" : "Post editor"}
             </h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Write MDX, upload post images once, and preview the result live.
+              {mode === "edit"
+                ? "Update the post, replace images, or change the slug."
+                : "Write your post, upload images once, and preview the result live."}
             </p>
           </div>
 
@@ -138,7 +171,9 @@ export function BlogAdminForm({ action }: BlogAdminFormProps) {
                 className="mt-2 w-full rounded-2xl border border-zinc-300 bg-transparent px-4 py-3 text-sm outline-none file:mr-4 file:rounded-full file:border-0 file:bg-zinc-950 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white dark:border-zinc-700 dark:file:bg-zinc-100 dark:file:text-zinc-950"
               />
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Upload once. Files are saved to <code>/public/blog/&lt;slug&gt;/</code>. The first image becomes the cover image.
+                {mode === "edit"
+                  ? "Uploading new images replaces the current post images."
+                  : "Upload once. Files are saved under /public/blog/&lt;slug&gt;/."}
               </p>
             </div>
 
@@ -150,6 +185,30 @@ export function BlogAdminForm({ action }: BlogAdminFormProps) {
               placeholder="Vector Network concept illustration"
               helpText="Used for the first uploaded image."
             />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex items-center gap-3 rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:text-zinc-200">
+              <input
+                type="checkbox"
+                name="published"
+                checked={published}
+                onChange={(e) => setPublished(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300"
+              />
+              Published
+            </label>
+
+            <label className="flex items-center gap-3 rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:text-zinc-200">
+              <input
+                type="checkbox"
+                name="featured"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300"
+              />
+              Featured
+            </label>
           </div>
 
           <div>
@@ -178,18 +237,16 @@ export function BlogAdminForm({ action }: BlogAdminFormProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="mt-2 w-full rounded-2xl border border-zinc-300 bg-transparent px-4 py-3 text-sm leading-7 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500"
-              placeholder={`Write MDX here.
+              placeholder={`Write your content here.
 
 Use image paths like:
-![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)
-
-You can upload more images and reference them from the same folder.`}
+![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)`} 
             />
           </div>
 
           <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {wordCount} words · {parsedTags.length} tags · {imageFiles.length} images
+              {wordCount} words · {parsedTags.length} tags · {imageFiles.length} new images
             </p>
 
             <div className="flex gap-3">
@@ -205,7 +262,7 @@ You can upload more images and reference them from the same folder.`}
                 type="submit"
                 className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
               >
-                Save post
+                {mode === "edit" ? "Update post" : "Save post"}
               </button>
             </div>
           </div>
@@ -233,9 +290,9 @@ You can upload more images and reference them from the same folder.`}
               )}
             </div>
 
-            {imagePreviewUrls.length > 1 ? (
+            {displayImageUrls.length > 1 ? (
               <div className="grid grid-cols-4 gap-3">
-                {imagePreviewUrls.slice(1).map((url, index) => (
+                {displayImageUrls.slice(1).map((url, index) => (
                   <div
                     key={url}
                     className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
@@ -286,9 +343,9 @@ You can upload more images and reference them from the same folder.`}
             Quick notes
           </h3>
           <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
-            <li>• The slug becomes the MDX file name.</li>
-            <li>• Uploaded images are saved beside the post under <code>/public/blog/&lt;slug&gt;/</code>.</li>
-            <li>• The first uploaded image is used as the cover image.</li>
+            <li>• The slug is the post key in the database.</li>
+            <li>• Existing images are shown until you upload new ones.</li>
+            <li>• Uploading new images replaces the current set.</li>
             <li>• Tags are split by commas automatically.</li>
           </ul>
         </div>
