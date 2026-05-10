@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import path from "path";
 import { mkdir, rm, rename, writeFile } from "fs/promises";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensurePostStatsFile } from "@/lib/blog-metrics";
 import { countWords, parseTags, slugify } from "@/lib/blog-utils";

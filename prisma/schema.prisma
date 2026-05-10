@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Post {
@@ -26,7 +26,7 @@ model Post {
 
   images        PostImage[]
   stats         BlogPostStats?
-  likes BlogPostLike[]
+  likes         BlogPostLike[]
 
   @@index([slug])
   @@index([category])
@@ -36,13 +36,10 @@ model Post {
 
 model PostImage {
   id        String   @id @default(cuid())
-
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-
   url       String
   alt       String?
-
   createdAt DateTime @default(now())
 
   @@index([postId])
@@ -50,14 +47,11 @@ model PostImage {
 
 model BlogPostStats {
   id        String            @id @default(cuid())
-
   postId    String            @unique
   post      Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
-
   views     Int               @default(0)
   likes     Int               @default(0)
   comments  BlogPostComment[]
-
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
@@ -66,10 +60,8 @@ model BlogPostStats {
 
 model BlogPostComment {
   id        String         @id @default(cuid())
-
   statsId   String
   stats     BlogPostStats  @relation(fields: [statsId], references: [id], onDelete: Cascade)
-
   name      String
   message   String         @db.Text
   createdAt DateTime       @default(now())
@@ -79,10 +71,8 @@ model BlogPostComment {
 
 model BlogPostLike {
   id        String   @id @default(cuid())
-
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-
   visitorId String
   createdAt DateTime @default(now())
 

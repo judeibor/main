@@ -68,9 +68,10 @@ const homeSchema = {
   ],
 };
 
-export default function HomePage() {
+export default async function HomePage() {
   const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
-  const latestPost = getAllPosts()[0];
+  const posts = await getAllPosts();
+  const latestPost = posts[0];
 
   return (
     <>
