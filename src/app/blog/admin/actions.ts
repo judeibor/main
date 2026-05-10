@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import path from "path";
-import { mkdir, rm, rename, writeFile } from "fs/promises";
+import { copy, del, put } from "@vercel/blob";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensurePostStatsFile } from "@/lib/blog-metrics";
 import { countWords, parseTags, slugify } from "@/lib/blog-utils";
-
-const blogAssetsRoot = path.join(process.cwd(), "public", "blog");
 
 function isSafeSlug(slug: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
@@ -17,6 +15,10 @@ function isSafeSlug(slug: string) {
 
 function isFile(value: FormDataEntryValue): value is File {
   return typeof File !== "undefined" && value instanceof File;
+}
+
+function isRemoteUrl(value: string) {
+  return /^https?:\/\//i.test(value);
 }
 
 function safeImageFileName(fileName: string, index: number) {
@@ -32,34 +34,102 @@ function safeImageFileName(fileName: string, index: number) {
   return `${index + 1}-${base || `image-${index + 1}`}${ext}`;
 }
 
-async function saveImagesForSlug(slug: string, files: File[]) {
-  const postAssetsDir = path.join(blogAssetsRoot, slug);
-  await mkdir(postAssetsDir, { recursive: true });
-
-  const imagePaths: string[] = [];
-
-  for (let index = 0; index < files.length; index += 1) {
-    const file = files[index];
-    const fileName = safeImageFileName(file.name, index);
-    const filePath = path.join(postAssetsDir, fileName);
-
-    const bytes = await file.arrayBuffer();
-    await writeFile(filePath, Buffer.from(bytes));
-
-    imagePaths.push(`/blog/${slug}/${fileName}`);
-  }
-
-  return imagePaths;
+function getBlobPath(slug: string, fileName: string) {
+  return `blog/${slug}/${fileName}`;
 }
 
-async function renamePostAssetsFolder(fromSlug: string, toSlug: string) {
-  const fromDir = path.join(blogAssetsRoot, fromSlug);
-  const toDir = path.join(blogAssetsRoot, toSlug);
+function getFileNameFromUrl(urlOrPathname: string, index: number) {
+  try {
+    const pathname = isRemoteUrl(urlOrPathname)
+      ? new URL(urlOrPathname).pathname
+      : urlOrPathname;
+
+    const fileName = path.posix.basename(pathname);
+
+    return fileName || `image-${index + 1}.jpg`;
+  } catch {
+    return `image-${index + 1}.jpg`;
+  }
+}
+
+async function deleteBlobUrls(urls: string[]) {
+  const remoteUrls = urls.filter(isRemoteUrl);
+
+  if (remoteUrls.length === 0) return;
 
   try {
-    await rename(fromDir, toDir);
-  } catch {
-    // Folder may not exist or rename may fail on some environments.
+    await del(remoteUrls);
+  } catch (error) {
+    console.error("Failed to delete blob(s):", error);
+  }
+}
+
+async function uploadImagesForSlug(slug: string, files: File[]) {
+  const uploaded: Array<{ url: string; pathname: string }> = [];
+
+  try {
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const fileName = safeImageFileName(file.name, index);
+      const pathname = getBlobPath(slug, fileName);
+
+      const blob = await put(pathname, file, {
+        access: "public",
+        addRandomSuffix: false,
+      });
+
+      uploaded.push({
+        url: blob.url,
+        pathname: blob.pathname,
+      });
+    }
+  } catch (error) {
+    await deleteBlobUrls(uploaded.map((blob) => blob.url));
+    throw error;
+  }
+
+  return uploaded;
+}
+
+async function copyImagesToSlug(
+  existingImages: { url: string }[],
+  slug: string
+) {
+  const copied: Array<{ url: string; pathname: string }> = [];
+
+  try {
+    for (let index = 0; index < existingImages.length; index += 1) {
+      const image = existingImages[index];
+
+      if (!isRemoteUrl(image.url)) {
+        continue;
+      }
+
+      const fileName = getFileNameFromUrl(image.url, index);
+      const pathname = getBlobPath(slug, fileName);
+
+      const blob = await copy(image.url, pathname, {
+        access: "public",
+      });
+
+      copied.push({
+        url: blob.url,
+        pathname: blob.pathname,
+      });
+    }
+  } catch (error) {
+    await deleteBlobUrls(copied.map((blob) => blob.url));
+    throw error;
+  }
+
+  return copied;
+}
+
+async function ensureStatsFileSafely(slug: string) {
+  try {
+    await ensurePostStatsFile(slug);
+  } catch (error) {
+    console.error(`Failed to ensure stats file for "${slug}":`, error);
   }
 }
 
@@ -90,12 +160,13 @@ export async function createPost(formData: FormData) {
     .filter(isFile)
     .filter((file) => file.size > 0);
 
-  const imagePaths =
-    uploadedImages.length > 0 ? await saveImagesForSlug(slug, uploadedImages) : [];
-
   const now = new Date();
   const wordCount = countWords(`${title} ${excerpt} ${content}`);
-  const coverImage = imagePaths[0] ?? null;
+
+  const uploadedBlobs =
+    uploadedImages.length > 0 ? await uploadImagesForSlug(slug, uploadedImages) : [];
+
+  const coverImage = uploadedBlobs[0]?.url ?? null;
   const coverImageAlt = coverImage ? coverImageAltInput || title : null;
 
   try {
@@ -114,10 +185,10 @@ export async function createPost(formData: FormData) {
         featured,
         publishedAt: now,
         images:
-          imagePaths.length > 0
+          uploadedBlobs.length > 0
             ? {
-                create: imagePaths.map((url, index) => ({
-                  url,
+                create: uploadedBlobs.map((blob, index) => ({
+                  url: blob.url,
                   alt: index === 0 ? coverImageAlt : null,
                 })),
               }
@@ -125,6 +196,8 @@ export async function createPost(formData: FormData) {
       },
     });
   } catch (error) {
+    await deleteBlobUrls(uploadedBlobs.map((blob) => blob.url));
+
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
@@ -135,7 +208,7 @@ export async function createPost(formData: FormData) {
     throw error;
   }
 
-  await ensurePostStatsFile(slug);
+  await ensureStatsFileSafely(slug);
 
   revalidatePath("/blog");
   revalidatePath("/blog/admin");
@@ -197,13 +270,10 @@ export async function updatePost(formData: FormData) {
     : contentInput;
 
   if (uploadedImages.length > 0) {
-    await rm(path.join(blogAssetsRoot, originalSlug), {
-      recursive: true,
-      force: true,
-    });
+    await deleteBlobUrls(existing.images.map((image) => image.url));
 
-    const imagePaths = await saveImagesForSlug(slug, uploadedImages);
-    const coverImage = imagePaths[0] ?? null;
+    const uploadedBlobs = await uploadImagesForSlug(slug, uploadedImages);
+    const coverImage = uploadedBlobs[0]?.url ?? null;
     const coverImageAlt = coverImage ? coverImageAltInput || title : null;
 
     try {
@@ -223,14 +293,16 @@ export async function updatePost(formData: FormData) {
           featured,
           images: {
             deleteMany: {},
-            create: imagePaths.map((url, index) => ({
-              url,
+            create: uploadedBlobs.map((blob, index) => ({
+              url: blob.url,
               alt: index === 0 ? coverImageAlt : null,
             })),
           },
         },
       });
     } catch (error) {
+      await deleteBlobUrls(uploadedBlobs.map((blob) => blob.url));
+
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
@@ -241,23 +313,67 @@ export async function updatePost(formData: FormData) {
       throw error;
     }
   } else {
-    const nextCoverImage = existing.coverImage
-      ? slugChanged
-        ? existing.coverImage.replaceAll(`/blog/${originalSlug}/`, `/blog/${slug}/`)
-        : existing.coverImage
-      : null;
+    const canMigrateBlobImages = existing.images.every((image) =>
+      isRemoteUrl(image.url)
+    );
 
-    const nextCoverImageAlt = nextCoverImage
-      ? coverImageAltInput || existing.coverImageAlt || title
-      : null;
+    if (slugChanged && canMigrateBlobImages && existing.images.length > 0) {
+      const copiedBlobs = await copyImagesToSlug(existing.images, slug);
+      const nextCoverImage = copiedBlobs[0]?.url ?? existing.coverImage ?? null;
+      const nextCoverImageAlt = nextCoverImage
+        ? coverImageAltInput || existing.coverImageAlt || title
+        : null;
 
-    if (slugChanged) {
-      await renamePostAssetsFolder(originalSlug, slug);
-    }
+      try {
+        await prisma.$transaction([
+          prisma.post.update({
+            where: { slug: originalSlug },
+            data: {
+              slug,
+              title,
+              excerpt,
+              content: nextContent,
+              category,
+              tags,
+              coverImage: nextCoverImage,
+              coverImageAlt: nextCoverImageAlt,
+              wordCount,
+              published,
+              featured,
+            },
+          }),
+          ...copiedBlobs.map((blob, index) =>
+            prisma.postImage.update({
+              where: { id: existing.images[index].id },
+              data: {
+                url: blob.url,
+                alt: index === 0 ? nextCoverImageAlt : null,
+              },
+            })
+          ),
+        ]);
+      } catch (error) {
+        await deleteBlobUrls(copiedBlobs.map((blob) => blob.url));
 
-    try {
-      await prisma.$transaction([
-        prisma.post.update({
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          throw new Error(`A post with slug "${slug}" already exists.`);
+        }
+
+        throw error;
+      }
+
+      await deleteBlobUrls(existing.images.map((image) => image.url));
+    } else {
+      const nextCoverImage = existing.coverImage ?? null;
+      const nextCoverImageAlt = nextCoverImage
+        ? coverImageAltInput || existing.coverImageAlt || title
+        : null;
+
+      try {
+        await prisma.post.update({
           where: { slug: originalSlug },
           data: {
             slug,
@@ -272,31 +388,21 @@ export async function updatePost(formData: FormData) {
             published,
             featured,
           },
-        }),
-        ...(slugChanged
-          ? existing.images.map((image) =>
-              prisma.postImage.update({
-                where: { id: image.id },
-                data: {
-                  url: image.url.replaceAll(`/blog/${originalSlug}/`, `/blog/${slug}/`),
-                },
-              })
-            )
-          : []),
-      ]);
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002"
-      ) {
-        throw new Error(`A post with slug "${slug}" already exists.`);
-      }
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          throw new Error(`A post with slug "${slug}" already exists.`);
+        }
 
-      throw error;
+        throw error;
+      }
     }
   }
 
-  await ensurePostStatsFile(slug);
+  await ensureStatsFileSafely(slug);
 
   revalidatePath("/blog");
   revalidatePath("/blog/admin");
@@ -317,17 +423,20 @@ export async function deletePost(formData: FormData) {
 
   const existing = await prisma.post.findUnique({
     where: { slug },
-    select: { id: true },
+    include: {
+      images: {
+        select: {
+          url: true,
+        },
+      },
+    },
   });
 
   if (!existing) {
     throw new Error(`Post "${slug}" not found.`);
   }
 
-  await rm(path.join(blogAssetsRoot, slug), {
-    recursive: true,
-    force: true,
-  });
+  await deleteBlobUrls(existing.images.map((image) => image.url));
 
   await prisma.post.delete({
     where: { slug },

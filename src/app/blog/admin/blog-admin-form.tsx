@@ -182,7 +182,7 @@ export function BlogAdminForm({
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 {mode === "edit"
                   ? "Uploading new images replaces the current post images."
-                  : "Upload once. Files are saved under /public/blog/&lt;slug&gt;/."}
+                  : "Images are stored in Vercel Blob in production, not in the local public folder."}
               </p>
             </div>
 
@@ -248,14 +248,14 @@ export function BlogAdminForm({
               className="mt-2 w-full rounded-2xl border border-zinc-300 bg-transparent px-4 py-3 text-sm leading-7 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500"
               placeholder={`Write your content here.
 
-Use image paths like:
-![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)`}
+If you need inline images, use the public Blob URL for the uploaded file.`}
             />
           </div>
 
           <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {wordCount} words · {parsedTags.length} tags · {imageFiles.length} new images
+              {wordCount} words · {parsedTags.length} tags ·{" "}
+              {imageFiles.length} new images
             </p>
 
             <div className="flex gap-3">
@@ -370,7 +370,13 @@ function SubmitButton({ mode }: { mode: "create" | "edit" }) {
       aria-busy={pending}
       className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
     >
-      {pending ? (mode === "edit" ? "Updating..." : "Saving...") : mode === "edit" ? "Update post" : "Save post"}
+      {pending
+        ? mode === "edit"
+          ? "Updating..."
+          : "Saving..."
+        : mode === "edit"
+          ? "Update post"
+          : "Save post"}
     </button>
   );
 }
