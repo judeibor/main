@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic";
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
- const cookieStore = await cookies();
-const visitorId = cookieStore.get("blog_visitor_id")?.value ?? null;
+  const cookieStore = await cookies();
+  const visitorId = cookieStore.get("blog_visitor_id")?.value ?? null;
 
   let post;
   try {
@@ -27,6 +27,12 @@ const visitorId = cookieStore.get("blog_visitor_id")?.value ?? null;
       },
       include: {
         images: {
+          select: {
+            id: true,
+            url: true,
+            fileName: true,
+            alt: true,
+          },
           orderBy: { createdAt: "asc" },
         },
         stats: {

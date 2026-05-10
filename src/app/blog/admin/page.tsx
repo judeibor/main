@@ -31,11 +31,21 @@ export default async function BlogAdminPage({ searchParams }: Props) {
   const posts = await prisma.post.findMany({
     include: {
       images: {
+        select: {
+          id: true,
+          url: true,
+          fileName: true,
+          alt: true,
+        },
         orderBy: { createdAt: "asc" },
       },
       stats: {
         include: {
-          comments: true,
+          comments: {
+            select: {
+              id: true,
+            },
+          },
         },
       },
     },

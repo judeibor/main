@@ -271,14 +271,7 @@ export function SiteHeader() {
           <div className="flex-1 overflow-y-auto">
             <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10 lg:px-8 lg:py-12">
               <div className="space-y-6">
-                <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">
-                    Navigation
-                  </p>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-                    Explore the portfolio, see selected work, read the blog, or get in touch.
-                  </p>
-                </div>
+                
 
                 <div className="grid gap-3">
                   {navItems.map((item, index) => {

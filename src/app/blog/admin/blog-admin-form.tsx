@@ -182,7 +182,7 @@ export function BlogAdminForm({
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 {mode === "edit"
                   ? "Uploading new images replaces the current post images."
-                  : "Images are stored in Vercel Blob in production, not in the local public folder."}
+                  : "Images are stored in PostgreSQL and served from /blog/&lt;slug&gt;/&lt;fileName&gt;."}
               </p>
             </div>
 
@@ -248,14 +248,14 @@ export function BlogAdminForm({
               className="mt-2 w-full rounded-2xl border border-zinc-300 bg-transparent px-4 py-3 text-sm leading-7 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500"
               placeholder={`Write your content here.
 
-If you need inline images, use the public Blob URL for the uploaded file.`}
+Use image paths like:
+![Alt text](/blog/what-is-vnetwork/1-cover-image.jpg)`}
             />
           </div>
 
           <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {wordCount} words · {parsedTags.length} tags ·{" "}
-              {imageFiles.length} new images
+              {wordCount} words · {parsedTags.length} tags · {imageFiles.length} new images
             </p>
 
             <div className="flex gap-3">

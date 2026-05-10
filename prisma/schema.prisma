@@ -38,11 +38,16 @@ model PostImage {
   id        String   @id @default(cuid())
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   url       String
+  fileName  String?
+  mimeType  String?
+  data      Bytes?
   alt       String?
   createdAt DateTime @default(now())
 
   @@index([postId])
+  @@index([postId, fileName])
 }
 
 model BlogPostStats {
@@ -61,10 +66,10 @@ model BlogPostStats {
 model BlogPostComment {
   id        String         @id @default(cuid())
   statsId   String
-  stats     BlogPostStats  @relation(fields: [statsId], references: [id], onDelete: Cascade)
+  stats     BlogPostStats   @relation(fields: [statsId], references: [id], onDelete: Cascade)
   name      String
-  message   String         @db.Text
-  createdAt DateTime       @default(now())
+  message   String          @db.Text
+  createdAt DateTime        @default(now())
 
   @@index([statsId])
 }

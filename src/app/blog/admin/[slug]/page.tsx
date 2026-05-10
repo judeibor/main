@@ -33,6 +33,12 @@ export default async function EditPostPage({ params, searchParams }: Props) {
     where: { slug },
     include: {
       images: {
+        select: {
+          id: true,
+          url: true,
+          fileName: true,
+          alt: true,
+        },
         orderBy: { createdAt: "asc" },
       },
       stats: {

@@ -28,6 +28,9 @@ export type PostImageMinAggregateOutputType = {
   id: string | null
   postId: string | null
   url: string | null
+  fileName: string | null
+  mimeType: string | null
+  data: runtime.Bytes | null
   alt: string | null
   createdAt: Date | null
 }
@@ -36,6 +39,9 @@ export type PostImageMaxAggregateOutputType = {
   id: string | null
   postId: string | null
   url: string | null
+  fileName: string | null
+  mimeType: string | null
+  data: runtime.Bytes | null
   alt: string | null
   createdAt: Date | null
 }
@@ -44,6 +50,9 @@ export type PostImageCountAggregateOutputType = {
   id: number
   postId: number
   url: number
+  fileName: number
+  mimeType: number
+  data: number
   alt: number
   createdAt: number
   _all: number
@@ -54,6 +63,9 @@ export type PostImageMinAggregateInputType = {
   id?: true
   postId?: true
   url?: true
+  fileName?: true
+  mimeType?: true
+  data?: true
   alt?: true
   createdAt?: true
 }
@@ -62,6 +74,9 @@ export type PostImageMaxAggregateInputType = {
   id?: true
   postId?: true
   url?: true
+  fileName?: true
+  mimeType?: true
+  data?: true
   alt?: true
   createdAt?: true
 }
@@ -70,6 +85,9 @@ export type PostImageCountAggregateInputType = {
   id?: true
   postId?: true
   url?: true
+  fileName?: true
+  mimeType?: true
+  data?: true
   alt?: true
   createdAt?: true
   _all?: true
@@ -151,6 +169,9 @@ export type PostImageGroupByOutputType = {
   id: string
   postId: string
   url: string
+  fileName: string | null
+  mimeType: string | null
+  data: runtime.Bytes | null
   alt: string | null
   createdAt: Date
   _count: PostImageCountAggregateOutputType | null
@@ -180,6 +201,9 @@ export type PostImageWhereInput = {
   id?: Prisma.StringFilter<"PostImage"> | string
   postId?: Prisma.StringFilter<"PostImage"> | string
   url?: Prisma.StringFilter<"PostImage"> | string
+  fileName?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  mimeType?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  data?: Prisma.BytesNullableFilter<"PostImage"> | runtime.Bytes | null
   alt?: Prisma.StringNullableFilter<"PostImage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostImage"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
@@ -189,6 +213,9 @@ export type PostImageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   postId?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  fileName?: Prisma.SortOrderInput | Prisma.SortOrder
+  mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  data?: Prisma.SortOrderInput | Prisma.SortOrder
   alt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
@@ -201,6 +228,9 @@ export type PostImageWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PostImageWhereInput | Prisma.PostImageWhereInput[]
   postId?: Prisma.StringFilter<"PostImage"> | string
   url?: Prisma.StringFilter<"PostImage"> | string
+  fileName?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  mimeType?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  data?: Prisma.BytesNullableFilter<"PostImage"> | runtime.Bytes | null
   alt?: Prisma.StringNullableFilter<"PostImage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostImage"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
@@ -210,6 +240,9 @@ export type PostImageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   postId?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  fileName?: Prisma.SortOrderInput | Prisma.SortOrder
+  mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  data?: Prisma.SortOrderInput | Prisma.SortOrder
   alt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PostImageCountOrderByAggregateInput
@@ -224,6 +257,9 @@ export type PostImageScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"PostImage"> | string
   postId?: Prisma.StringWithAggregatesFilter<"PostImage"> | string
   url?: Prisma.StringWithAggregatesFilter<"PostImage"> | string
+  fileName?: Prisma.StringNullableWithAggregatesFilter<"PostImage"> | string | null
+  mimeType?: Prisma.StringNullableWithAggregatesFilter<"PostImage"> | string | null
+  data?: Prisma.BytesNullableWithAggregatesFilter<"PostImage"> | runtime.Bytes | null
   alt?: Prisma.StringNullableWithAggregatesFilter<"PostImage"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PostImage"> | Date | string
 }
@@ -231,6 +267,9 @@ export type PostImageScalarWhereWithAggregatesInput = {
 export type PostImageCreateInput = {
   id?: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
   post: Prisma.PostCreateNestedOneWithoutImagesInput
@@ -240,6 +279,9 @@ export type PostImageUncheckedCreateInput = {
   id?: string
   postId: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
 }
@@ -247,6 +289,9 @@ export type PostImageUncheckedCreateInput = {
 export type PostImageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   post?: Prisma.PostUpdateOneRequiredWithoutImagesNestedInput
@@ -256,6 +301,9 @@ export type PostImageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -264,6 +312,9 @@ export type PostImageCreateManyInput = {
   id?: string
   postId: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
 }
@@ -271,6 +322,9 @@ export type PostImageCreateManyInput = {
 export type PostImageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -279,6 +333,9 @@ export type PostImageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -297,6 +354,9 @@ export type PostImageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   postId?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  fileName?: Prisma.SortOrder
+  mimeType?: Prisma.SortOrder
+  data?: Prisma.SortOrder
   alt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -305,6 +365,9 @@ export type PostImageMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   postId?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  fileName?: Prisma.SortOrder
+  mimeType?: Prisma.SortOrder
+  data?: Prisma.SortOrder
   alt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -313,6 +376,9 @@ export type PostImageMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   postId?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  fileName?: Prisma.SortOrder
+  mimeType?: Prisma.SortOrder
+  data?: Prisma.SortOrder
   alt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -359,9 +425,16 @@ export type PostImageUncheckedUpdateManyWithoutPostNestedInput = {
   deleteMany?: Prisma.PostImageScalarWhereInput | Prisma.PostImageScalarWhereInput[]
 }
 
+export type NullableBytesFieldUpdateOperationsInput = {
+  set?: runtime.Bytes | null
+}
+
 export type PostImageCreateWithoutPostInput = {
   id?: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
 }
@@ -369,6 +442,9 @@ export type PostImageCreateWithoutPostInput = {
 export type PostImageUncheckedCreateWithoutPostInput = {
   id?: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
 }
@@ -406,6 +482,9 @@ export type PostImageScalarWhereInput = {
   id?: Prisma.StringFilter<"PostImage"> | string
   postId?: Prisma.StringFilter<"PostImage"> | string
   url?: Prisma.StringFilter<"PostImage"> | string
+  fileName?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  mimeType?: Prisma.StringNullableFilter<"PostImage"> | string | null
+  data?: Prisma.BytesNullableFilter<"PostImage"> | runtime.Bytes | null
   alt?: Prisma.StringNullableFilter<"PostImage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostImage"> | Date | string
 }
@@ -413,6 +492,9 @@ export type PostImageScalarWhereInput = {
 export type PostImageCreateManyPostInput = {
   id?: string
   url: string
+  fileName?: string | null
+  mimeType?: string | null
+  data?: runtime.Bytes | null
   alt?: string | null
   createdAt?: Date | string
 }
@@ -420,6 +502,9 @@ export type PostImageCreateManyPostInput = {
 export type PostImageUpdateWithoutPostInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -427,6 +512,9 @@ export type PostImageUpdateWithoutPostInput = {
 export type PostImageUncheckedUpdateWithoutPostInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -434,6 +522,9 @@ export type PostImageUncheckedUpdateWithoutPostInput = {
 export type PostImageUncheckedUpdateManyWithoutPostInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   url?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  data?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -444,6 +535,9 @@ export type PostImageSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   id?: boolean
   postId?: boolean
   url?: boolean
+  fileName?: boolean
+  mimeType?: boolean
+  data?: boolean
   alt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -453,6 +547,9 @@ export type PostImageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   postId?: boolean
   url?: boolean
+  fileName?: boolean
+  mimeType?: boolean
+  data?: boolean
   alt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -462,6 +559,9 @@ export type PostImageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   postId?: boolean
   url?: boolean
+  fileName?: boolean
+  mimeType?: boolean
+  data?: boolean
   alt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -471,11 +571,14 @@ export type PostImageSelectScalar = {
   id?: boolean
   postId?: boolean
   url?: boolean
+  fileName?: boolean
+  mimeType?: boolean
+  data?: boolean
   alt?: boolean
   createdAt?: boolean
 }
 
-export type PostImageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "url" | "alt" | "createdAt", ExtArgs["result"]["postImage"]>
+export type PostImageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "url" | "fileName" | "mimeType" | "data" | "alt" | "createdAt", ExtArgs["result"]["postImage"]>
 export type PostImageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -495,6 +598,9 @@ export type $PostImagePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     id: string
     postId: string
     url: string
+    fileName: string | null
+    mimeType: string | null
+    data: runtime.Bytes | null
     alt: string | null
     createdAt: Date
   }, ExtArgs["result"]["postImage"]>
@@ -924,6 +1030,9 @@ export interface PostImageFieldRefs {
   readonly id: Prisma.FieldRef<"PostImage", 'String'>
   readonly postId: Prisma.FieldRef<"PostImage", 'String'>
   readonly url: Prisma.FieldRef<"PostImage", 'String'>
+  readonly fileName: Prisma.FieldRef<"PostImage", 'String'>
+  readonly mimeType: Prisma.FieldRef<"PostImage", 'String'>
+  readonly data: Prisma.FieldRef<"PostImage", 'Bytes'>
   readonly alt: Prisma.FieldRef<"PostImage", 'String'>
   readonly createdAt: Prisma.FieldRef<"PostImage", 'DateTime'>
 }

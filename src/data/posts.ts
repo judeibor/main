@@ -62,6 +62,9 @@ export async function getAllPosts(options: { includeDrafts?: boolean } = {}) {
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
     include: {
       images: {
+        select: {
+          url: true,
+        },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -78,6 +81,9 @@ export async function getPostBySlug(
     where: options.includeDrafts ? { slug } : { slug, published: true },
     include: {
       images: {
+        select: {
+          url: true,
+        },
         orderBy: { createdAt: "asc" },
       },
     },

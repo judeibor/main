@@ -842,6 +842,9 @@ export const PostImageScalarFieldEnum = {
   id: 'id',
   postId: 'postId',
   url: 'url',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  data: 'data',
   alt: 'alt',
   createdAt: 'createdAt'
 } as const
@@ -958,6 +961,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 

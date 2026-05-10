@@ -99,6 +99,9 @@ export const PostImageScalarFieldEnum = {
   id: 'id',
   postId: 'postId',
   url: 'url',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  data: 'data',
   alt: 'alt',
   createdAt: 'createdAt'
 } as const
