@@ -107,11 +107,11 @@ export function BlogAdminForm({
   }
 
   function goNext() {
-    setCurrentStep((step) => Math.min(4, (step + 1) as Step));
+    setCurrentStep((step) => (step === 4 ? 4 : ((step + 1) as Step)));
   }
 
   function goBack() {
-    setCurrentStep((step) => Math.max(1, (step - 1) as Step));
+    setCurrentStep((step) => (step === 1 ? 1 : ((step - 1) as Step)));
   }
 
   const steps = [
@@ -149,6 +149,7 @@ export function BlogAdminForm({
           {steps.map((step) => {
             const active = step.id === currentStep;
             const done = step.id < currentStep;
+
             return (
               <button
                 key={step.id}
@@ -508,88 +509,115 @@ Use image paths like:
           </div>
         </form>
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              Live preview
-            </h3>
+        {currentStep === 4 ? (
+          <aside className="space-y-6">
+            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Final preview
+              </h3>
 
-            <div className="mt-4 space-y-4">
-              <div className="overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800">
-                {coverPreviewUrl ? (
-                  <img
-                    src={coverPreviewUrl}
-                    alt={coverImageAlt || title || "Cover preview"}
-                    className="aspect-[16/10] w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex aspect-[16/10] items-center justify-center bg-zinc-50 text-sm text-zinc-500 dark:bg-zinc-950/50 dark:text-zinc-400">
-                    Cover image preview will appear here
-                  </div>
-                )}
-              </div>
-
-              {displayImageUrls.length > 1 ? (
-                <div className="grid grid-cols-4 gap-3">
-                  {displayImageUrls.slice(1).map((url, index) => (
-                    <div
-                      key={url}
-                      className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
-                    >
-                      <img
-                        src={url}
-                        alt={`Uploaded image ${index + 2}`}
-                        className="aspect-square w-full object-cover"
-                      />
+              <div className="mt-4 space-y-4">
+                <div className="overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800">
+                  {coverPreviewUrl ? (
+                    <img
+                      src={coverPreviewUrl}
+                      alt={coverImageAlt || title || "Cover preview"}
+                      className="aspect-[16/10] w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex aspect-[16/10] items-center justify-center bg-zinc-50 text-sm text-zinc-500 dark:bg-zinc-950/50 dark:text-zinc-400">
+                      Cover image preview will appear here
                     </div>
-                  ))}
+                  )}
                 </div>
-              ) : null}
 
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-                  {category || "Category"}
-                </p>
-                <h4 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-                  {title || "Post title preview"}
-                </h4>
-                <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                  {excerpt || "Your excerpt will appear here."}
-                </p>
-              </div>
+                {displayImageUrls.length > 1 ? (
+                  <div className="grid grid-cols-4 gap-3">
+                    {displayImageUrls.slice(1).map((url, index) => (
+                      <div
+                        key={url}
+                        className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800"
+                      >
+                        <img
+                          src={url}
+                          alt={`Uploaded image ${index + 2}`}
+                          className="aspect-square w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
 
-              <div className="flex flex-wrap gap-2">
-                {parsedTags.length > 0 ? (
-                  parsedTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-300"
-                    >
-                      {tag}
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                    {category || "Category"}
+                  </p>
+                  <h4 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                    {title || "Post title preview"}
+                  </h4>
+                  <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                    {excerpt || "Your excerpt will appear here."}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {parsedTags.length > 0 ? (
+                    parsedTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-300"
+                      >
+                        {tag}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      No tags yet
                     </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                    No tags yet
-                  </span>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              Quick notes
-            </h3>
-            <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
-              <li>• The slug is the post key in the database.</li>
-              <li>• Existing images stay visible until you upload new ones.</li>
-              <li>• Uploading new images replaces the current set.</li>
-              <li>• Tags are split by commas automatically.</li>
-              <li>• The final step is the last review before saving.</li>
-            </ul>
-          </div>
-        </aside>
+            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Quick notes
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
+                <li>• The slug is the post key in the database.</li>
+                <li>• Existing images stay visible until you upload new ones.</li>
+                <li>• Uploading new images replaces the current set.</li>
+                <li>• Tags are split by commas automatically.</li>
+              </ul>
+            </div>
+          </aside>
+        ) : (
+          <aside className="space-y-6">
+            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Step guide
+              </h3>
+              <div className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
+                <p>Step 1: title, slug, category, tags.</p>
+                <p>Step 2: excerpt and full content.</p>
+                <p>Step 3: images and publishing options.</p>
+                <p>Step 4: final preview and submit.</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Quick notes
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
+                <li>• The slug is the post key in the database.</li>
+                <li>• Existing images stay visible until you upload new ones.</li>
+                <li>• Uploading new images replaces the current set.</li>
+                <li>• Tags are split by commas automatically.</li>
+              </ul>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );
