@@ -29,10 +29,6 @@ function getImageFromPost(
   });
 }
 
-function toArrayBuffer(data: Buffer | Uint8Array) {
-  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-}
-
 async function tryLegacyFile(slug: string, fileName: string) {
   const legacyPath = path.join(process.cwd(), "public", "blog", slug, fileName);
 
@@ -76,7 +72,7 @@ export async function GET(
   }
 
   if (image.data) {
-    return new Response(toArrayBuffer(image.data), {
+    return new Response(new Uint8Array(image.data), {
       status: 200,
       headers: {
         "Content-Type": image.mimeType || "application/octet-stream",
@@ -91,7 +87,7 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  return new Response(toArrayBuffer(legacyBytes), {
+  return new Response(new Uint8Array(legacyBytes), {
     status: 200,
     headers: {
       "Content-Type": image.mimeType || "application/octet-stream",
