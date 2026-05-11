@@ -5,6 +5,11 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+type RouteParams = Promise<{
+  slug: string;
+  fileName: string;
+}>;
+
 function getImageFromPost(
   images: {
     url: string;
@@ -24,6 +29,10 @@ function getImageFromPost(
   });
 }
 
+function toArrayBuffer(data: Buffer | Uint8Array) {
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+}
+
 async function tryLegacyFile(slug: string, fileName: string) {
   const legacyPath = path.join(process.cwd(), "public", "blog", slug, fileName);
 
@@ -36,7 +45,7 @@ async function tryLegacyFile(slug: string, fileName: string) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ slug: string; fileName: string }> }
+  { params }: { params: RouteParams }
 ) {
   const { slug, fileName: encodedFileName } = await params;
   const fileName = decodeURIComponent(encodedFileName);
@@ -67,7 +76,7 @@ export async function GET(
   }
 
   if (image.data) {
-    return new Response(image.data, {
+    return new Response(toArrayBuffer(image.data), {
       status: 200,
       headers: {
         "Content-Type": image.mimeType || "application/octet-stream",
@@ -82,7 +91,7 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  return new Response(legacyBytes, {
+  return new Response(toArrayBuffer(legacyBytes), {
     status: 200,
     headers: {
       "Content-Type": image.mimeType || "application/octet-stream",
