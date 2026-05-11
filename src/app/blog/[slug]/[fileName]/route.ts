@@ -1,14 +1,7 @@
 import path from "path";
 import { readFile } from "fs/promises";
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-type RouteContext = {
-  params: Promise<{
-    slug: string;
-    fileName: string;
-  }>;
-};
 
 export const runtime = "nodejs";
 
@@ -41,9 +34,12 @@ async function tryLegacyFile(slug: string, fileName: string) {
   }
 }
 
-export async function GET(_request: NextRequest, { params }: RouteContext) {
-  const { slug, fileName: rawFileName } = await params;
-  const fileName = decodeURIComponent(rawFileName);
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ slug: string; fileName: string }> }
+) {
+  const { slug, fileName: encodedFileName } = await params;
+  const fileName = decodeURIComponent(encodedFileName);
 
   const post = await prisma.post.findUnique({
     where: { slug },
